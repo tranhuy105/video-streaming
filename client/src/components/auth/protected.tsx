@@ -7,6 +7,7 @@ import {
 // import useAuth from "@/hooks/useAuth";
 import useJWTSession from "@/hooks/useJWTSession";
 import { useEffect } from "react";
+import useAuth from "@/hooks/useAuth";
 
 const ProtectedRouteFallBack = () => {
   // const { auth } = useAuth();
@@ -14,10 +15,20 @@ const ProtectedRouteFallBack = () => {
 
   const navigate = useNavigate();
   const { session, isSessionFetched } = useJWTSession();
+  const { setAuth } = useAuth();
 
   useEffect(() => {
     if (isSessionFetched && !session) {
+      setAuth({
+        accessToken: "",
+        user_id: "",
+      });
       navigate("/login");
+    } else if (isSessionFetched && session) {
+      setAuth((cur) => ({
+        ...cur,
+        user_id: session?.user_id,
+      }));
     }
   }, [isSessionFetched, session, navigate]);
 

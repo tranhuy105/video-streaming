@@ -12,7 +12,7 @@ router.post("/login", async (req, res) => {
 
     // CHECK XEM USER CÓ TỒN TẠI KHÔNG
     const curUser = await db.query(
-      "SELECT * FROM users WHERE user_email = $1",
+      "SELECT * FROM users WHERE email = $1",
       [email]
     );
     // console.log(curUser.rows[0]);
@@ -25,7 +25,7 @@ router.post("/login", async (req, res) => {
     // CHECK XEM PASSWORD CÓ JUAN KHÔNG
     const validPassword = await bcrypt.compare(
       password,
-      curUser.rows[0].user_password
+      curUser.rows[0].password
     );
 
     if (!validPassword)
@@ -34,7 +34,7 @@ router.post("/login", async (req, res) => {
         .json({ error: "Incorrect password" });
 
     // SEND CHO USER ACCESS TOKEN ĐỂ CẤP TRUY CẬP VÀO PROTECTED ROUTES
-    let tokens = jwtTokens(curUser.rows[0].user_id);
+    let tokens = jwtTokens(curUser.rows[0].id);
 
     res.cookie("refresh_token", tokens.refreshToken, {
       httpOnly: true,
@@ -42,9 +42,9 @@ router.post("/login", async (req, res) => {
     res.json({
       accessToken: tokens.accessToken,
       user: {
-        id: curUser.rows[0].user_id,
-        email: curUser.rows[0].user_email,
-        name: curUser.rows[0].user_name,
+        id: curUser.rows[0].id,
+        email: curUser.rows[0].email,
+        name: curUser.rows[0].name,
       },
     });
   } catch (error) {
@@ -72,7 +72,7 @@ router.post("/refresh_token", (req, res) => {
             .status(403)
             .json({ error: error.message });
 
-        let tokens = jwtTokens(user.user_id);
+        let tokens = jwtTokens(user.id);
         res.cookie("refresh_token", tokens.refreshToken, {
           httpOnly: true,
         });

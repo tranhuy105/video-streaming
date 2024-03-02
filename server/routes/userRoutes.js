@@ -10,7 +10,7 @@ router.post("/", async (req, res) => {
     const { name, email, password } = req.body;
 
     const user = await db.query(
-      "SELECT * FROM users WHERE user_email = $1",
+      "SELECT * FROM users WHERE email = $1",
       [email]
     );
 
@@ -23,8 +23,8 @@ router.post("/", async (req, res) => {
     const hashedPassword = await bcrypt.hash(password, 10);
 
     const newUser = await db.query(
-      "INSERT INTO users (user_name, user_password, user_email) VALUES ($1, $2, $3) RETURNING *",
-      [name, hashedPassword, email]
+      "INSERT INTO users (name, password, email, img) VALUES ($1, $2, $3, $4) RETURNING *",
+      [name, hashedPassword, email, ""]
     );
 
     res.status(200).json({

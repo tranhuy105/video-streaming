@@ -5,7 +5,7 @@ const useAuth = () => {
   const authContext = useContext(AuthContext);
   const {
     auth = {
-      // user: { id: "", name: "", email: "" },
+      user_id: "",
       accessToken: "",
     },
     setAuth = () => {},

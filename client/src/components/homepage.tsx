@@ -9,9 +9,6 @@ const Homepage = () => {
     <div>
       <p>Home</p>
       <SignOutButton />
-      <p>CURRENT JWT SESSION</p>
-      <br />
-      {/* <p>{JSON.stringify(session)}</p> */}
     </div>
   );
 };

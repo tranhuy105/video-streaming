@@ -2,8 +2,14 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import useAxiosPrivate from "./useAxiosPrivate";
 
+type sessionType = {
+  user_id?: string;
+  iat?: number;
+  exp?: number;
+} | null;
+
 const useJWTSession = () => {
-  const [session, setSession] = useState(null);
+  const [session, setSession] = useState<sessionType>(null);
   const [isSessionFetched, setIsSessionFetched] =
     useState(false);
   const axiosPrivate = useAxiosPrivate();

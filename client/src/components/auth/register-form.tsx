@@ -17,7 +17,7 @@ import { useNavigate } from "react-router-dom";
 // import { useContext } from "react";
 // import { AuthContext } from "@/context/AuthProvider";
 
-const REGISTER_URL = "/auth/register";
+const REGISTER_URL = "/user";
 
 const formSchema = z.object({
   name: z.string().min(2),
@@ -45,6 +45,7 @@ export const RegisterForm = () => {
     values: z.infer<typeof formSchema>
   ) {
     try {
+      console.log(values);
       await axios.post(
         REGISTER_URL,
         JSON.stringify(values),

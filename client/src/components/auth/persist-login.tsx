@@ -30,10 +30,10 @@ const PersistLogin = () => {
     };
   }, []);
 
-  useEffect(() => {
-    console.log(`isLoading: ${isLoading}`);
-    console.log(auth?.accessToken);
-  }, [isLoading]);
+  // useEffect(() => {
+  //   console.log(`isLoading: ${isLoading}`);
+  //   console.log(auth?.accessToken);
+  // }, [isLoading]);
 
   return isLoading ? <p>Loading...</p> : <Outlet />;
 };
