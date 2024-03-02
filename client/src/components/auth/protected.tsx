@@ -30,7 +30,7 @@ const ProtectedRouteFallBack = () => {
         user_id: session?.user_id,
       }));
     }
-  }, [isSessionFetched, session, navigate]);
+  }, [isSessionFetched, session, navigate, setAuth]);
 
   return !isSessionFetched ? (
     <div>Loading...</div>
