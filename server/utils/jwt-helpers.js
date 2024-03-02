@@ -18,7 +18,7 @@ function jwtTokens(user_id) {
     payload,
     process.env.REFRESH_TOKEN_SECRET,
     {
-      expiresIn: "15s",
+      expiresIn: "30m",
     }
   );
 

@@ -1,18 +1,16 @@
-import { Outlet, useNavigate } from "react-router-dom";
+import { Outlet } from "react-router-dom";
+import { Navbar } from "./navbar";
+import { Sidebar } from "./sidebar";
 
 const Layout = () => {
-  const navigate = useNavigate();
-
   return (
-    <main className="min-h-screen w-full">
-      <div className="w-full h-full bg-green-200 flex items-center justify-between py-3 px-2">
-        <div onClick={() => navigate("/")}>HOME</div>
-        <div onClick={() => navigate("/login")}>LOGIN</div>
-        <div onClick={() => navigate("/register")}>
-          REGISTER
-        </div>
+    <main className="min-h-screen bg-slate-100 relative">
+      <Navbar />
+      <Sidebar />
+
+      <div className="h-full pl-64 w-full bg-neutral-900 overflow-y-auto">
+        <Outlet />
       </div>
-      <Outlet />
     </main>
   );
 };

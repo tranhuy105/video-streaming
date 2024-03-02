@@ -5,7 +5,6 @@ import {
   useNavigate,
 } from "react-router-dom";
 // import useAuth from "@/hooks/useAuth";
-import useJWTSession from "@/hooks/useJWTSession";
 import { useEffect } from "react";
 import useAuth from "@/hooks/useAuth";
 
@@ -14,29 +13,22 @@ const ProtectedRouteFallBack = () => {
   // const location = useLocation();
 
   const navigate = useNavigate();
-  const { session, isSessionFetched } = useJWTSession();
-  const { setAuth } = useAuth();
+
+  const { auth, setAuth } = useAuth();
+  console.log(auth);
 
   useEffect(() => {
-    if (isSessionFetched && !session) {
+    if (!auth?.accessToken) {
       setAuth({
         accessToken: "",
         user_id: "",
       });
       navigate("/login");
-    } else if (isSessionFetched && session) {
-      setAuth((cur) => ({
-        ...cur,
-        user_id: session?.user_id,
-      }));
     }
-  }, [isSessionFetched, session, navigate, setAuth]);
+  }, [navigate, setAuth, auth]);
 
-  return !isSessionFetched ? (
-    <div>Loading...</div>
-  ) : (
-    <Outlet />
-  );
+  return <Outlet />;
+
 
   // return auth.accessToken ? (
   //   <Outlet />

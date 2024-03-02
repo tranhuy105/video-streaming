@@ -13,12 +13,15 @@ const useRefreshToken = () => {
       }
     );
 
+    console.log(response.data);
+
     setAuth((cur) => {
       // console.log(JSON.stringify(pre));
       // console.log(response.data.accessToken);
       return {
         ...cur,
         accessToken: response.data.accessToken,
+        user_id: response.data.user_id,
       };
     });
     return response.data.accessToken;

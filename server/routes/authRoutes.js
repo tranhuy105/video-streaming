@@ -2,7 +2,7 @@ const db = require("../db");
 const bcrypt = require("bcrypt");
 const jwtTokens = require("../utils/jwt-helpers");
 const jwt = require("jsonwebtoken");
-
+require("dotenv").config();
 const router = require("express").Router();
 
 // LOG IN
@@ -72,17 +72,14 @@ router.post("/refresh_token", (req, res) => {
             .status(403)
             .json({ error: error.message });
 
-        let tokens = jwtTokens(user.id);
+        let tokens = jwtTokens(user.user_id);
         res.cookie("refresh_token", tokens.refreshToken, {
           httpOnly: true,
         });
-        // res.cookie("access_token", tokens.accessToken, {
-        //   httpOnly: true,
-        // });
-        // res.json("OK");
 
         res.json({
           accessToken: tokens.accessToken,
+          user_id: user.user_id,
         });
       }
     );

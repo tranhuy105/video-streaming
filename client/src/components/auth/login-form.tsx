@@ -54,25 +54,23 @@ export const LoginForm = () => {
           withCredentials: true,
         }
       );
-      // console.log(JSON.stringify(response?.data));
+
       const accessToken = response?.data.accessToken;
-      // const user = response?.data.user;
-      // setAuth({ accessToken, user });
+
       setAuth({ accessToken });
 
-      // quay lai trang nguoi dung vua bi redirect den day
-      navigate(from, { replace: true });
+      // navigate(from, { replace: true });
     } catch (error: any) {
       console.log(error.response?.data);
     }
   }
 
   return (
-    <div className="container px-5 py-4 h-screen flex items-center justify-center bg-green-400">
+    <div className="px-5 py-4 h-screen flex flex-col items-center justify-center bg-neutral-900">
       <Form {...form}>
         <form
           onSubmit={form.handleSubmit(onSubmit)}
-          className="gap-4 border px-3 py-4 bg-secondary w-full md:w-1/2 h-full flex flex-col items-center justify-center"
+          className="gap-4 border px-20 rounded-xl py-12 bg-white w-full md:w-fit h-fit space-y-6 text-muted-foreground"
         >
           <FormField
             control={form.control}
@@ -83,6 +81,7 @@ export const LoginForm = () => {
                 <FormControl>
                   <Input
                     placeholder=""
+                    className="w-80"
                     {...field}
                     autoComplete="off"
                   />
@@ -111,7 +110,7 @@ export const LoginForm = () => {
             <p>Dont have an account?</p>
             <p
               onClick={() => navigate("/register")}
-              className="text-muted-foreground text-blue-500 text-xs cursor-pointer"
+              className=" text-blue-500/60 text-xs cursor-pointer"
             >
               Create an account
             </p>

@@ -21,7 +21,6 @@ function authenticateToken(req, res, next) {
           .status(403)
           .json({ error: error.message });
 
-      // console.log(req.user);
       req.user = user;
       next();
     }

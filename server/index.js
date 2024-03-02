@@ -21,7 +21,11 @@ app.use(cookieParser());
 app.use("/api/v1/auth", require("./routes/authRoutes"));
 //user
 app.use("/api/v1/user", require("./routes/userRoutes"));
-//properties
+// vide
+app.use(
+  "/api/v1/video",
+  require("./routes/videoRoutes")
+);
 
 app.listen(PORT, () => {
   console.log(`server listening at port ${PORT}`);

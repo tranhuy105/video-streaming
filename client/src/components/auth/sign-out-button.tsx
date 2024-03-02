@@ -19,8 +19,7 @@ export const SignOutButton = () => {
   return (
     <div
       className={cn(
-        "cursor-pointer",
-        buttonVariants({ variant: "outline" })
+        "cursor-pointer bg-transparent text-blue-500 border-blue-500 border px-3 py-2 rounded-lg hover:text-white transition-all hover:border-white duration-300 "
       )}
       onClick={handleLogOut}
     >

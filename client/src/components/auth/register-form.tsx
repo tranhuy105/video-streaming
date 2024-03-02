@@ -63,11 +63,11 @@ export const RegisterForm = () => {
   }
 
   return (
-    <div className="container px-5 py-4 h-screen flex items-center justify-center bg-green-400">
+    <div className="px-5 py-4 h-screen flex items-center justify-center bg-neutral-900">
       <Form {...form}>
         <form
           onSubmit={form.handleSubmit(onSubmit)}
-          className="gap-4 border px-3 py-4 bg-secondary w-full md:w-1/2 h-full flex flex-col items-center justify-center"
+          className="gap-4 border px-20 rounded-xl py-12 bg-secondary w-full md:w-fit h-fit space-y-6 text-muted-foreground"
         >
           <FormField
             control={form.control}
@@ -97,6 +97,7 @@ export const RegisterForm = () => {
                     placeholder=""
                     {...field}
                     autoComplete="off"
+                    className="w-80"
                   />
                 </FormControl>
                 <FormMessage />
@@ -123,7 +124,7 @@ export const RegisterForm = () => {
             <p>Already have an account?</p>
             <p
               onClick={() => navigate("/login")}
-              className="text-muted-foreground text-blue-500 text-xs cursor-pointer"
+              className=" text-blue-500/60 text-xs cursor-pointer"
             >
               Log in to your account
             </p>
