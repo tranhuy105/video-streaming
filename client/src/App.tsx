@@ -14,6 +14,7 @@ import { RedirectAuth } from "./components/auth/redirect-auth.tsx";
 import { VideoUploadForm } from "./components/upload-video/video-upload-form.tsx";
 import LayoutB from "./components/layoutb.tsx";
 import VideoPage from "./pages/videoPage.tsx";
+import ChannelPage from "./pages/channelPage.tsx";
 
 function App() {
   return (
@@ -21,8 +22,13 @@ function App() {
       <Routes>
         <Route element={<PersistLogin />}>
           <Route element={<ProtectedRouteFallBack />}>
-            <Route path="/" element={<Layout />}>
-              <Route index element={<Homepage />} />
+            <Route element={<Layout />}>
+              <Route path="/" element={<Homepage />} />
+
+              <Route
+                path="/channel/:channel_owner_id"
+                element={<ChannelPage />}
+              />
             </Route>
 
             <Route element={<LayoutB />}>

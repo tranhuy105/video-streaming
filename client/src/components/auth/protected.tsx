@@ -15,7 +15,7 @@ const ProtectedRouteFallBack = () => {
   const navigate = useNavigate();
 
   const { auth, setAuth } = useAuth();
-  console.log(auth);
+  // console.log(auth);
 
   useEffect(() => {
     if (!auth?.accessToken) {
@@ -28,7 +28,6 @@ const ProtectedRouteFallBack = () => {
   }, [navigate, setAuth, auth]);
 
   return <Outlet />;
-
 
   // return auth.accessToken ? (
   //   <Outlet />

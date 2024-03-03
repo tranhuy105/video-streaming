@@ -57,7 +57,10 @@ export const LoginForm = () => {
 
       const accessToken = response?.data.accessToken;
 
-      setAuth({ accessToken });
+      setAuth({
+        accessToken,
+        user_id: response.data.user.id,
+      });
 
       // navigate(from, { replace: true });
     } catch (error: any) {

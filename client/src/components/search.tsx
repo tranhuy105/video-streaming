@@ -1,14 +1,10 @@
 import { ChangeEvent, useEffect, useState } from "react";
 import { Input } from "./ui/input";
 import { Search } from "lucide-react";
-import { useDebounce } from "usehooks-ts";
-import qs from "query-string";
-import { useNavigate } from "react-router-dom";
+import { useSearchParams } from "react-router-dom";
 
 export const SearchInput = () => {
-  const [value, setValue] = useState("");
-  const debouncedValue = useDebounce(value, 1000);
-  const navigate = useNavigate();
+  const [value, setValue] = useState<string>("");
 
   const handleChange = (
     e: ChangeEvent<HTMLInputElement>
@@ -16,29 +12,32 @@ export const SearchInput = () => {
     setValue(e.target.value);
   };
 
-  useEffect(() => {
-    const url = qs.stringifyUrl(
-      {
-        url: "/",
-        query: {
-          search: debouncedValue,
-        },
-      },
-      { skipEmptyString: true, skipNull: true }
-    );
+  const [, setSearchParams] = useSearchParams();
 
-    if (url !== "/") navigate(url);
-  }, [navigate, debouncedValue]);
+  const handleSearch = (e: any) => {
+    e.preventDefault();
+    if (value.length < 3) return;
+    setSearchParams((currentSearchParams) => {
+      return new URLSearchParams({
+        ...Object.fromEntries(currentSearchParams),
+        search: value,
+      });
+    });
+    setValue("");
+  };
 
   return (
-    <div className="w-full relative">
+    <div className="w-full relative ">
       <Search className="absolute top-1/2 left-3 transfrom -translate-y-1/2 text-muted-foreground h-4 w-4" />
-      <Input
-        className="w-full max-w-[516px] pl-9"
-        placeholder="Search for videos"
-        value={value}
-        onChange={handleChange}
-      />
+      <form action="" onSubmit={handleSearch}>
+        <Input
+          className="w-full max-w-[516px] pl-9 bg-neutral-900 text-neutral-200/60 border-neutral-700 rounded-full"
+          placeholder="Search for videos"
+          value={value}
+          onChange={handleChange}
+        />
+        <button type="submit" className="hidden "></button>
+      </form>
     </div>
   );
 };

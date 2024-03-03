@@ -1,11 +1,10 @@
-import { cn } from "@/lib/utils";
-import { Redo, ThumbsDown, ThumbsUp } from "lucide-react";
-import { formatDistanceToNow } from "date-fns";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import useAxiosPrivate from "@/hooks/useAxiosPrivate";
 import { useParams } from "react-router-dom";
-const PLACEHOLDER_IMG =
-  "https://yt3.ggpht.com/ytc/AIdro_njJ7pfpxR9y1ocO6GXo6fvf0JEKOnRXX6WKtBXJw=s88-c-k-c0x00ffffff-no-rj";
+import { UserInfo } from "@/components/video/user-info";
+import { formatDistanceToNow } from "date-fns";
+import { VideoCards } from "@/components/video-cards";
+import { Loading } from "@/components/loading";
 
 // const bagu =
 //   "http://localhost:5000/api/v1/video/20240302_234625357_guruguru.mp4";
@@ -37,6 +36,8 @@ type VideoType = {
   updated_at: Date;
   name: string;
   img: string;
+  user_has_liked: boolean;
+  user_has_sub: boolean;
 };
 
 const VideoPage = () => {
@@ -52,110 +53,76 @@ const VideoPage = () => {
       addSuffix: true,
     });
 
+  const fetchVideo = useCallback(async () => {
+    try {
+      setIsLoading(true);
+      const response = await axiosPrivate.get(
+        `/video/single/${video_id}`
+      );
+      // console.log(response.data);
+      setVideo(response.data);
+    } catch (error) {
+      console.log(error);
+    } finally {
+      setIsLoading(false);
+    }
+  }, [video_id, axiosPrivate]);
+
   useEffect(() => {
-    const fetchVideo = async () => {
-      try {
-        setIsLoading(true);
-        const response = await axiosPrivate.get(
-          `/video/single/${video_id}`
-        );
-        setVideo(response.data);
-      } catch (error) {
-        console.log(error);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
     fetchVideo();
-  }, []);
+  }, [video_id, fetchVideo]);
 
-  if (isLoading) return <div>Loading...</div>;
+  if (isLoading)
+    return (
+      <div className="min-h-[calc(100vh-64px)]">
+        <Loading />;
+      </div>
+    );
 
   if (!video_id || !video)
-    return <div>Video dont exist</div>;
+    return (
+      <div className="min-h-[calc(100vh-64px)]">
+        Video dont exist
+      </div>
+    );
 
   return (
     <div className="w-full min-h-screen text-white flex container">
       <div className="w-3/4">
         {/* VIDEO CONTAINER */}
         <div className="w-full">
-          <video controls className="w-full">
+          <video controls className="w-full" autoPlay loop>
             <source src={video.src} type="video/mp4" />
           </video>
-          <div>
-            <h1 className="pt-4 pb-2 text-2xl font-bold text-white/90 capitalize">
-              {video.title}
-            </h1>
-            <div className="px-1 py-3 flex justify-between items-center">
-              {/* USER INFO */}
-              <div className="flex gap-3 px-1 items-center justify-center">
-                <img
-                  src={
-                    video.img ? video.img : PLACEHOLDER_IMG
-                  }
-                  className="w-12 h-12 rounded-full block cursor-pointer"
-                />
-                <div className="flex flex-col gap-1 justify-center">
-                  <p className="text-xl font-semibold">
-                    {video.name}
-                  </p>
-                  <p className="text-xs text-muted-foreground">
-                    {150000} Người đăng kí
-                  </p>
-                </div>
-
-                {/* SUBSCRIBE */}
-                <div
-                  className={cn(
-                    "bg-neutral-200 text-neutral-900 border font-semibold cursor-pointer border-neutral-900 rounded-full px-3 py-2 ml-4"
-                  )}
-                >
-                  Đăng kí
-                </div>
-              </div>
-
-              {/* LIKE DISLIKE SHARE */}
-              <div className="flex gap-x-8 items-center justify-center">
-                {/* LIKE DISLIKE */}
-                <div className="flex text-neutral-200/80 divide-x divide-neutral-900">
-                  <div className="bg-neutral-800/80 hover:bg-neutral-700 transition duration-300 rounded-l-full px-3 py-2 cursor-pointer flex gap-2 items-center justify-center">
-                    <ThumbsUp size={24} strokeWidth={1} />
-                    <p className="font-semibold text-sm">
-                      202K
-                    </p>
-                  </div>
-
-                  <div className="bg-neutral-800/80 hover:bg-neutral-700 transition duration-300 rounded-r-full px-3 py-2 cursor-pointer flex items-center justify-center">
-                    <ThumbsDown size={24} strokeWidth={1} />
-                  </div>
-                </div>
-
-                {/* SHARE */}
-                <div className="bg-neutral-800/80 hover:bg-neutral-700 transition duration-300 rounded-full px-3 py-2 pl-2 cursor-pointer flex items-center justify-center gap-2 mr-3">
-                  <Redo
-                    size={24}
-                    strokeWidth={1}
-                    className="text-neutral-200/60"
-                  />
-                  <p className="text-neutral-200/80">
-                    Chia sẻ
-                  </p>
-                </div>
-              </div>
-            </div>
-          </div>
+          <UserInfo
+            video_id={video.id}
+            title={video.title}
+            name={video.name}
+            owner_id={video.owner_id}
+            img={video.img}
+            user_has_liked={video.user_has_liked}
+            user_has_sub={video.user_has_sub}
+          />
         </div>
 
         {/* MO TA */}
-        <div className="w-full h-32 bg-blue-500"></div>
+        <div className="w-full px-4 py-3 my-4 bg-neutral-800/80  rounded-xl">
+          <div className="text-sm text-neutral-200/80 font-semibold">
+            {updatedAtLabel}
+          </div>
+          <p className="text-md mt-[2px] text-muted-foreground">
+            {video.description}
+          </p>
+        </div>
 
         {/* COMMENTS SECTION */}
         <div className="w-full h-screen bg-green-400"></div>
       </div>
 
       {/* RELATED VIDEO */}
-      <div className="w-1/4 bg-red-500"></div>
+      <div className="w-1/4 mx-4">
+        <VideoCards small />
+      </div>
     </div>
   );
 };

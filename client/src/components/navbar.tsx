@@ -16,7 +16,7 @@ export const Navbar = () => {
       >
         <Youtube className=" text-red-500" size={48} />
         <p className=" font-bold text-[24px] text-red-50 leading-loose tracking-normal mb-[2px]">
-          ZiuTube
+          YiuTube
         </p>
       </div>
       <div className="md:w-1/2">
