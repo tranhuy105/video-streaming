@@ -143,4 +143,111 @@ router.post('/channel/:channel_owner_id', authenticateToken, async (req, res) =>
   }
 })
 
+router.post(
+  "/name",
+  authenticateToken,
+  async (req, res) => {
+    const { user_id } = req.user;
+    const { new_name } = req.body;
+
+    try {
+      await db.query(
+        `
+        UPDATE 
+          users 
+        SET 
+          name = $1
+        WHERE 
+          id = $2
+      `,
+        [new_name, user_id]
+      );
+
+      res.status(200).json("OK");
+    } catch (error) {
+      console.log(error);
+      res.status(500).json({
+        error: "Internal Server Error, can't update name",
+      });
+    }
+  }
+);
+
+router.post("/img", authenticateToken, async (req, res) => {
+  const { user_id } = req.user;
+  const { new_img } = req.body;
+
+  try {
+    const results = await db.query(
+      `
+        UPDATE 
+          users 
+        SET 
+          img = $1
+        WHERE 
+          id = $2
+        RETURNING *
+      `,
+      [new_img, user_id]
+    );
+
+    res.status(200).json(results.rows[0]);
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({
+      error: "Internal Server Error, can't update img",
+    });
+  }
+});
+
+router.get(
+  "/studio",
+  authenticateToken,
+  async (req, res) => {
+    const { user_id } = req.user;
+
+    try {
+      const results = await db.query(
+        `
+        SELECT 
+          COUNT(likes.*) AS like_count,
+          COUNT(comments.*) as cmt_count, 
+          video.title, 
+          video.id, 
+          video.src, 
+          video.description, 
+          video.created_at,
+          video.filename
+        FROM 
+          video
+        JOIN 
+          users 
+        ON 
+          video.owner_id = users.id
+        LEFT JOIN 
+          likes 
+        ON 
+          likes.video_id = video.id
+        LEFT JOIN 
+          comments 
+        ON 
+          comments.video_id = video.id
+        WHERE 
+          users.id = $1
+        GROUP BY video.id
+      `,
+        [user_id]
+      );
+
+      // console.log(results.rows);
+      res.status(200).json(results.rows);
+    } catch (error) {
+      console.log(error);
+      res
+        .status(500)
+        .json({ error: "INTERNAL SERVER ERROR, DB FAIL" });
+    }
+  }
+);
+
 module.exports = router;

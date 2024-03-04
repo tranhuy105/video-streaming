@@ -130,7 +130,7 @@ export const UserInfo = ({
             <p className="text-xl font-semibold">{name}</p>
             <Subcount
               owner_id={owner_id}
-              subCount={subCount}
+              subCount={subCount * 1}
               setSubCount={setSubCount}
             />
           </div>

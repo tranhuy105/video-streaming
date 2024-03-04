@@ -34,7 +34,7 @@ export const Subcount = ({
 
   return (
     <p className="text-sm -mt-1 text-muted-foreground">
-      {subCount} người đăng kí
+      {subCount && subCount * 1} người đăng kí
     </p>
   );
 };

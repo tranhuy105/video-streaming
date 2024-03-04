@@ -7,6 +7,7 @@ const handleUploadError = require("../middleware/upload");
 const insertVideoToDatabase = require("../utils/insert-video");
 const authenticateToken = require("../middleware/authorization");
 const db = require("../db");
+const deleteFile = require("../utils/delete-video");
 
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
@@ -61,6 +62,29 @@ router.post(
   }
 );
 
+router.post(
+  "/delete",
+  authenticateToken,
+  async (req, res) => {
+    const { filename } = req.body;
+    const filePath = "uploads/" + filename;
+    try {
+      await deleteFile(filePath);
+      await db.query(
+        "DELETE FROM video WHERE filename = $1",
+        [filename]
+      );
+
+      res.status(200).json("ok");
+    } catch (error) {
+      console.log(error);
+      res.status(500).json({
+        error: "INTERNAL SERVER ERROR CANT DELEtE VIDEO",
+      });
+    }
+  }
+);
+
 // streaming api
 router.get("/:filename", function (req, res) {
   const videoPath = "uploads/" + req.params.filename;
@@ -106,6 +130,7 @@ router.get("/:filename", function (req, res) {
 
 router.get("/", authenticateToken, async (req, res) => {
   const { user_id } = req.user;
+
   // console.log(user_id);
   let sqlQuery =
     "SELECT video.id, src, title, updated_at, users.name,users.img FROM video JOIN users ON users.id = video.owner_id";
@@ -161,6 +186,7 @@ router.get("/", authenticateToken, async (req, res) => {
   }
 
   try {
+    // console.log(sqlQuery);
     sqlQuery += " ORDER BY updated_at DESC;";
     const response = await db.query(sqlQuery, queryParams);
     res.status(200).json(response.rows);

@@ -1,12 +1,9 @@
 import useAxiosPrivate from "@/hooks/useAxiosPrivate";
 import { useEffect, useState } from "react";
 import { VideoItem } from "./video/video-item";
-import {
-  useParams,
-  useSearchParams,
-} from "react-router-dom";
+import { useParams } from "react-router-dom";
 import { cn } from "@/lib/utils";
-import { Loading } from "./loading";
+import { VideoSkeleton } from "./video/video-skeletion";
 
 export type VideoType = {
   id: string;
@@ -17,29 +14,18 @@ export type VideoType = {
   img: string;
 };
 
-export const VideoCards = () => {
+export const SmallVideoCards = () => {
   const [videos, setVideos] = useState<VideoType[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const axiosPrivate = useAxiosPrivate();
-  const [searchParams] = useSearchParams();
-  const { video_id } = useParams();
 
-  const query = Object.fromEntries(searchParams);
-  const filterQuery = query.filter
-    ? "?filter=" + query.filter + "&"
-    : "?";
-  const searchQuery = query.search
-    ? "search=" + query.search
-    : "";
+  const { video_id } = useParams();
 
   useEffect(() => {
     const fetchVideo = async () => {
       try {
         setIsLoading(true);
-        const response = await axiosPrivate.get(
-          "/video" + filterQuery + searchQuery
-        );
-        // console.log(response.data);
+        const response = await axiosPrivate.get("/video");
         setVideos(response.data);
       } catch (error) {
         console.log(error);
@@ -49,12 +35,12 @@ export const VideoCards = () => {
     };
 
     fetchVideo();
-  }, [filterQuery, searchQuery, axiosPrivate]);
+  }, [axiosPrivate]);
 
   return (
     <div
       className={cn(
-        "text-white min-h-[calc(100vh-64px)]  grid grid-cols-3 w-full gap-x-3 gap-y-6 p-4 pr-8"
+        "text-white min-h-[calc(100vh-64px)]  grid grid-cols-1 w-full gap-x-3 gap-y-6 p-4 px-3 pr-8"
       )}
     >
       {!isLoading ? (
@@ -70,7 +56,11 @@ export const VideoCards = () => {
           );
         })
       ) : (
-        <Loading />
+        <>
+          <VideoSkeleton small />
+          <VideoSkeleton small />
+          <VideoSkeleton small />
+        </>
       )}
     </div>
   );

@@ -1,4 +1,4 @@
-import { ChangeEvent, useEffect, useState } from "react";
+import { ChangeEvent, useState } from "react";
 import { Input } from "./ui/input";
 import { Search } from "lucide-react";
 import { useSearchParams } from "react-router-dom";
@@ -16,7 +16,7 @@ export const SearchInput = () => {
 
   const handleSearch = (e: any) => {
     e.preventDefault();
-    if (value.length < 3) return;
+    if (value.length < 1) return;
     setSearchParams((currentSearchParams) => {
       return new URLSearchParams({
         ...Object.fromEntries(currentSearchParams),

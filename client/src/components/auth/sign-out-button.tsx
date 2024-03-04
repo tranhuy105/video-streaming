@@ -1,5 +1,4 @@
 import { cn } from "@/lib/utils";
-import { buttonVariants } from "../ui/button";
 import useLogout from "@/hooks/useLogout";
 import { useNavigate } from "react-router-dom";
 

@@ -17,7 +17,7 @@ export const Thumbnail = ({
       <div className="hidden w-0 h-0" aria-hidden>
         <VideoThumbnail
           videoUrl={src}
-          snapshotAtTime={3}
+          snapshotAtTime={5}
           renderThumbnail={false}
           thumbnailHandler={(thumbnail: any) =>
             setImageBase64(thumbnail)
@@ -28,7 +28,7 @@ export const Thumbnail = ({
         <img
           src={imageBase64}
           alt=""
-          className="w-full h-full rounded-xl"
+          className="w-full h-full rounded-md"
         />
       ) : (
         <div className="w-full h-full animate-pulse flex items-center justify-center bg-neutral-900">

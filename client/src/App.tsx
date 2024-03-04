@@ -15,6 +15,7 @@ import { VideoUploadForm } from "./components/upload-video/video-upload-form.tsx
 import LayoutB from "./components/layoutb.tsx";
 import VideoPage from "./pages/videoPage.tsx";
 import ChannelPage from "./pages/channelPage.tsx";
+import StudioPage from "./pages/studioPage.tsx";
 
 function App() {
   return (
@@ -28,6 +29,10 @@ function App() {
               <Route
                 path="/channel/:channel_owner_id"
                 element={<ChannelPage />}
+              />
+              <Route
+                path="/studio"
+                element={<StudioPage />}
               />
             </Route>
 

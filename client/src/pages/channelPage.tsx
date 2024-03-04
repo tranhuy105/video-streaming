@@ -55,8 +55,6 @@ const ChannelPage = () => {
     fetchChannel();
   }, [channel_owner_id, axiosPrivate]);
 
-  console.log(channelInfo, videos);
-
   if (isLoading)
     return (
       <div className="min-h-[calc(100vh-64px)]">
@@ -67,7 +65,7 @@ const ChannelPage = () => {
   if (!channelInfo) return <div>404 CHANNEL NOT FOUND</div>;
 
   return (
-    <div className="min-h-[calc(100vh-64px)] text-neutral-200 bg-green">
+    <div className="min-h-[calc(100vh-64px)] text-neutral-200 bg-green pb-12">
       <ChannelInfo
         channelInfo={channelInfo}
         isOwner={isOwner}

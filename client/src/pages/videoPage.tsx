@@ -2,9 +2,10 @@ import { useCallback, useEffect, useState } from "react";
 import useAxiosPrivate from "@/hooks/useAxiosPrivate";
 import { useParams } from "react-router-dom";
 import { UserInfo } from "@/components/video/user-info";
-import { formatDistanceToNow } from "date-fns";
+import { format, formatDistanceToNow } from "date-fns";
 import { VideoCards } from "@/components/video-cards";
 import { Loading } from "@/components/loading";
+import { SmallVideoCards } from "@/components/small-video-cards";
 
 // const bagu =
 //   "http://localhost:5000/api/v1/video/20240302_234625357_guruguru.mp4";
@@ -52,6 +53,9 @@ const VideoPage = () => {
     formatDistanceToNow(video.updated_at, {
       addSuffix: true,
     });
+
+  const formattedDate =
+    video && format(video.updated_at, "dd 'thg' M, yyyy");
 
   const fetchVideo = useCallback(async () => {
     try {
@@ -108,7 +112,7 @@ const VideoPage = () => {
         {/* MO TA */}
         <div className="w-full px-4 py-3 my-4 bg-neutral-800/80  rounded-xl">
           <div className="text-sm text-neutral-200/80 font-semibold">
-            {updatedAtLabel}
+            {updatedAtLabel} • {formattedDate}
           </div>
           <p className="text-md mt-[2px] text-muted-foreground">
             {video.description}
@@ -121,7 +125,7 @@ const VideoPage = () => {
 
       {/* RELATED VIDEO */}
       <div className="w-1/4 mx-4">
-        <VideoCards small />
+        <SmallVideoCards />
       </div>
     </div>
   );
