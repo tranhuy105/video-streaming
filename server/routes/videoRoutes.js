@@ -30,6 +30,7 @@ const storage = multer.diskStorage({
 
 const upload = multer({ storage: storage });
 
+// upload video
 router.post(
   "/upload",
   authenticateToken,
@@ -62,6 +63,7 @@ router.post(
   }
 );
 
+// delete video
 router.post(
   "/delete",
   authenticateToken,
@@ -128,10 +130,11 @@ router.get("/:filename", function (req, res) {
   }
 });
 
+// get video with pagegination
 router.get("/", authenticateToken, async (req, res) => {
   const { user_id } = req.user;
+  const { page = 1, perPage = 6 } = req.query;
 
-  // console.log(user_id);
   let sqlQuery =
     "SELECT video.id, src, title, updated_at, users.name,users.img FROM video JOIN users ON users.id = video.owner_id";
   const queryParams = [];
@@ -182,12 +185,19 @@ router.get("/", authenticateToken, async (req, res) => {
         " AND ( video.title ILIKE $2 OR users.name ILIKE $3)";
       queryParams.push(`%${req.query.search}%`);
       queryParams.push(`%${req.query.search}%`);
+    } else {
+      sqlQuery = "SELECT video.id, src, title, updated_at, users.name,users.img FROM video JOIN users ON users.id = video.owner_id WHERE video.title ILIKE $1 OR users.name ILIKE $2";
+      queryParams.push(`%${req.query.search}%`);
+      queryParams.push(`%${req.query.search}%`);
     }
   }
 
   try {
-    // console.log(sqlQuery);
-    sqlQuery += " ORDER BY updated_at DESC;";
+    const offset = (page - 1) * perPage;
+    sqlQuery += ` ORDER BY updated_at DESC OFFSET $${queryParams.length + 1} LIMIT $${queryParams.length + 2};`;
+    queryParams.push(offset, perPage);
+  
+
     const response = await db.query(sqlQuery, queryParams);
     res.status(200).json(response.rows);
   } catch (err) {
@@ -198,6 +208,7 @@ router.get("/", authenticateToken, async (req, res) => {
   }
 });
 
+// get a single video for watching page
 router.get(
   "/single/:video_id",
   authenticateToken,
@@ -244,6 +255,7 @@ router.get(
   }
 );
 
+// like
 router.post(
   "/like",
   authenticateToken,
@@ -266,6 +278,8 @@ router.post(
   }
 );
 
+
+// dislike (delete like)
 router.post(
   "/delete/like",
   authenticateToken,
@@ -288,14 +302,130 @@ router.post(
   }
 );
 
-router.post("/comment", async (req, res) => {
-  try {
-  } catch (error) {
-    console.log(error);
-    res.status(500).json("Can't connect to database");
-  }
-});
+// add comment
+router.post(
+  "/comment",
+  authenticateToken,
+  async (req, res) => {
+    const { content, parent_id, video_id } = req.body;
+    const { user_id, user_name, user_img } = req.user;
 
+    console.log(user_name + " comment video: " + video_id);
+
+    let sqlQuery;
+    let queryParams = [user_id, video_id, content];
+
+    if (!parent_id) {
+      sqlQuery = `
+      INSERT INTO comments (user_id, video_id, content) VALUES ($1,$2,$3) RETURNING *;
+    `;
+    } else {
+      sqlQuery = `
+      INSERT INTO comments (user_id,video_id, content, parent_id) VALUES ($1,$2,$3,$4) RETURNING *;
+    `;
+      queryParams.push(parent_id);
+    }
+
+    const results = await db.query(sqlQuery, queryParams);
+
+    res
+      .status(200)
+      .json({ ...results.rows[0], user_img, user_name });
+
+    try {
+    } catch (error) {
+      console.log(error);
+      res.status(500).json("Can't connect to database");
+    }
+  }
+);
+
+// get all comment of a video
+router.get(
+  "/comment/:video_id",
+  authenticateToken,
+  async (req, res) => {
+    const { video_id } = req.params;
+    try {
+      const results = await db.query(
+        `
+    SELECT 
+      comments.*,
+      users.img as user_img, 
+      users.name as user_name 
+    FROM 
+      comments 
+    JOIN 
+      users 
+    ON 
+      comments.user_id = users.id 
+    WHERE 
+      video_id = $1
+    ORDER BY
+      comments.created_at DESC
+    `,
+        [video_id]
+      );
+
+      res.status(200).json(results.rows);
+    } catch (error) {
+      console.log(error);
+      res
+        .status(500)
+        .json("INTERNAL SERVER ERROR CANT CONNECT TO DB");
+    }
+  }
+);
+
+// update a comment
+router.post(
+  "/comment/update",
+  authenticateToken,
+  async (req, res) => {
+    const { id, content } = req.body;
+    try {
+      await db.query(
+        `
+      UPDATE comments SET content = $1 WHERE id = $2
+    `,
+        [content, id]
+      );
+
+      console.log("update comment with id:", id);
+
+      res.status(200).json("OK");
+    } catch (error) {
+      console.log(error);
+      res.status(500).json("FAIL");
+    }
+  }
+);
+
+// delete a comment
+router.post(
+  "/comment/delete",
+  authenticateToken,
+  async (req, res) => {
+    const { id } = req.body;
+    try {
+      await db.query(
+        `
+      DELETE FROM comments WHERE id = $1
+    `,
+        [id]
+      );
+
+      console.log("delete comment with id:", id);
+
+      res.status(200).json("OK");
+    } catch (error) {
+      console.log(error);
+      res.status(500).json("FAIL");
+    }
+  }
+);
+
+// get video like count
 router.post(
   "/likecount",
   authenticateToken,

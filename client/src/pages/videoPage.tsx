@@ -1,32 +1,11 @@
-import { useCallback, useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import useAxiosPrivate from "@/hooks/useAxiosPrivate";
 import { useParams } from "react-router-dom";
 import { UserInfo } from "@/components/video/user-info";
 import { format, formatDistanceToNow } from "date-fns";
-import { VideoCards } from "@/components/video-cards";
 import { Loading } from "@/components/loading";
 import { SmallVideoCards } from "@/components/small-video-cards";
-
-// const bagu =
-//   "http://localhost:5000/api/v1/video/20240302_234625357_guruguru.mp4";
-// const venom =
-//   "http://localhost:5000/api/v1/video/20240302_225712791_venom.mp4";
-// const idsm =
-//   "http://localhost:5000/api/v1/video/20240303_000738902_IDSMILE.mp4";
-
-// const fakeVideo = {
-//   id: "1",
-//   src: venom,
-//   title:
-//     "【エイプリルフールver.】ベノム / 休日、趣味人同士で。【エイプリルフールver.】ベノム / 休日、趣味人同士で。",
-//   description: "This is a description",
-//   updated_at: new Date().toISOString(),
-
-//   // join user table
-//   owner_id: "asd",
-//   img: "https://yt3.ggpht.com/ytc/AIdro_njJ7pfpxR9y1ocO6GXo6fvf0JEKOnRXX6WKtBXJw=s88-c-k-c0x00ffffff-no-rj",
-//   name: "プロセか",
-// };
+import { Comments } from "@/components/comment/comments";
 
 type VideoType = {
   id: string;
@@ -48,6 +27,7 @@ const VideoPage = () => {
     null
   );
   const [isLoading, setIsLoading] = useState(false);
+  const isFirstRender = useRef(true);
   const updatedAtLabel =
     video &&
     formatDistanceToNow(video.updated_at, {
@@ -57,24 +37,28 @@ const VideoPage = () => {
   const formattedDate =
     video && format(video.updated_at, "dd 'thg' M, yyyy");
 
-  const fetchVideo = useCallback(async () => {
-    try {
-      setIsLoading(true);
-      const response = await axiosPrivate.get(
-        `/video/single/${video_id}`
-      );
-      // console.log(response.data);
-      setVideo(response.data);
-    } catch (error) {
-      console.log(error);
-    } finally {
-      setIsLoading(false);
+  useEffect(() => {
+    const fetchVideo = async () => {
+      console.log("fetch video");
+      try {
+        setIsLoading(true);
+        const response = await axiosPrivate.get(
+          `/video/single/${video_id}`
+        );
+        // console.log(response.data);
+        setVideo(response.data);
+      } catch (error) {
+        console.log(error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    if (!isFirstRender.current) {
+      fetchVideo();
+    } else {
+      isFirstRender.current = false;
     }
   }, [video_id, axiosPrivate]);
-
-  useEffect(() => {
-    fetchVideo();
-  }, [video_id, fetchVideo]);
 
   if (isLoading)
     return (
@@ -120,11 +104,16 @@ const VideoPage = () => {
         </div>
 
         {/* COMMENTS SECTION */}
-        <div className="w-full h-screen bg-green-400"></div>
+        <div className="w-full min-h-screen">
+          <Comments
+            video_id={video.id}
+            video_owner_id={video.owner_id}
+          />
+        </div>
       </div>
 
       {/* RELATED VIDEO */}
-      <div className="w-1/4 mx-4">
+      <div className="w-1/4 mx-4 ml-8">
         <SmallVideoCards />
       </div>
     </div>

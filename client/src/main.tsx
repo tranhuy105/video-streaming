@@ -14,5 +14,6 @@ ReactDOM.createRoot(
         <App />
       </AuthProvider>
     </div>
+    //{" "}
   </React.StrictMode>
 );

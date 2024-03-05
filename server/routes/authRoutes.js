@@ -34,7 +34,11 @@ router.post("/login", async (req, res) => {
         .json({ error: "Incorrect password" });
 
     // SEND CHO USER ACCESS TOKEN ĐỂ CẤP TRUY CẬP VÀO PROTECTED ROUTES
-    let tokens = jwtTokens(curUser.rows[0].id);
+    let tokens = jwtTokens(
+      curUser.rows[0].id,
+      curUser.rows[0].img,
+      curUser.rows[0].name
+    );
 
     res.cookie("refresh_token", tokens.refreshToken, {
       httpOnly: true,
@@ -45,6 +49,7 @@ router.post("/login", async (req, res) => {
         id: curUser.rows[0].id,
         email: curUser.rows[0].email,
         name: curUser.rows[0].name,
+        user_img: curUser.rows[0].img,
       },
     });
   } catch (error) {
@@ -72,7 +77,11 @@ router.post("/refresh_token", (req, res) => {
             .status(403)
             .json({ error: error.message });
 
-        let tokens = jwtTokens(user.user_id);
+        let tokens = jwtTokens(
+          user.user_id,
+          user.user_img,
+          user.user_name
+        );
         res.cookie("refresh_token", tokens.refreshToken, {
           httpOnly: true,
         });
@@ -80,6 +89,8 @@ router.post("/refresh_token", (req, res) => {
         res.json({
           accessToken: tokens.accessToken,
           user_id: user.user_id,
+          user_img: user.user_img,
+          user_name: user.user_name,
         });
       }
     );

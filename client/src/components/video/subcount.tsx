@@ -1,5 +1,5 @@
 import useAxiosPrivate from "@/hooks/useAxiosPrivate";
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 
 export const Subcount = ({
   owner_id,
@@ -11,6 +11,7 @@ export const Subcount = ({
   subCount: number | null;
 }) => {
   const axiosPrivate = useAxiosPrivate();
+  const isFirstRender = useRef(true);
 
   useEffect(() => {
     const fetchSubCount = async () => {
@@ -29,7 +30,11 @@ export const Subcount = ({
       }
     };
 
-    fetchSubCount();
+    if (!isFirstRender.current) {
+      fetchSubCount();
+    } else {
+      isFirstRender.current = false;
+    }
   }, [owner_id, axiosPrivate, setSubCount]);
 
   return (

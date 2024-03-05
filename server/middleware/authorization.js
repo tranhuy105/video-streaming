@@ -20,7 +20,7 @@ function authenticateToken(req, res, next) {
         return res
           .status(403)
           .json({ error: error.message });
-
+      // console.log(user);
       req.user = user;
       next();
     }

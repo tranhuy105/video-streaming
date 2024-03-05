@@ -1,12 +1,11 @@
 import useAxiosPrivate from "@/hooks/useAxiosPrivate";
 import { useEffect, useState } from "react";
-import { VideoItem } from "./video/video-item";
-import {
-  useParams,
-  useSearchParams,
-} from "react-router-dom";
+import { useSearchParams } from "react-router-dom";
 import { cn } from "@/lib/utils";
-import { Loading } from "./loading";
+import { VideoSkeleton } from "./video/video-skeletion";
+
+import { Videos } from "./video/videos";
+import { LoadVideos } from "./video/load-videos";
 
 export type VideoType = {
   id: string;
@@ -22,23 +21,23 @@ export const VideoCards = () => {
   const [isLoading, setIsLoading] = useState(false);
   const axiosPrivate = useAxiosPrivate();
   const [searchParams] = useSearchParams();
-  const { video_id } = useParams();
 
   const query = Object.fromEntries(searchParams);
-  const filterQuery = query.filter
-    ? "?filter=" + query.filter + "&"
-    : "?";
-  const searchQuery = query.search
-    ? "search=" + query.search
-    : "";
+  const filterQuery = query.filter;
+
+  const searchQuery = query.search;
 
   useEffect(() => {
     const fetchVideo = async () => {
       try {
         setIsLoading(true);
-        const response = await axiosPrivate.get(
-          "/video" + filterQuery + searchQuery
-        );
+        const response = await axiosPrivate.get("/video", {
+          params: {
+            page: 1,
+            filter: filterQuery,
+            search: searchQuery,
+          },
+        });
         // console.log(response.data);
         setVideos(response.data);
       } catch (error) {
@@ -52,26 +51,37 @@ export const VideoCards = () => {
   }, [filterQuery, searchQuery, axiosPrivate]);
 
   return (
-    <div
-      className={cn(
-        "text-white min-h-[calc(100vh-64px)]  grid grid-cols-3 w-full gap-x-3 gap-y-6 p-4 pr-8"
-      )}
-    >
+    <>
       {!isLoading ? (
-        videos?.map((video: VideoType) => {
-          return (
-            video_id !== video.id && (
-              <VideoItem
-                key={video.id}
-                video={video}
-                small
-              />
-            )
-          );
-        })
+        <>
+          <div
+            className={cn(
+              "text-white grid grid-cols-3 w-full gap-x-3 gap-y-6 p-4 pr-8"
+            )}
+          >
+            <Videos videos={videos} />
+          </div>
+          <LoadVideos
+            filterQuery={filterQuery}
+            searchQuery={searchQuery}
+          />
+        </>
       ) : (
-        <Loading />
+        <div
+          className={cn(
+            "text-white grid grid-cols-3 w-full gap-x-3 gap-y-6 p-4 pr-8"
+          )}
+        >
+          <>
+            <VideoSkeleton small={false} />
+            <VideoSkeleton small={false} />
+            <VideoSkeleton small={false} />
+            <VideoSkeleton small={false} />
+            <VideoSkeleton small={false} />
+            <VideoSkeleton small={false} />
+          </>
+        </div>
       )}
-    </div>
+    </>
   );
 };

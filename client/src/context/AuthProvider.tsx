@@ -4,6 +4,8 @@ import { createContext, useState } from "react";
 
 interface AuthType {
   user_id?: string;
+  user_img?: string;
+  user_name?: string;
   accessToken?: string;
 }
 interface AuthContextType {

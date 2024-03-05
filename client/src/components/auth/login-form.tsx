@@ -57,9 +57,13 @@ export const LoginForm = () => {
 
       const accessToken = response?.data.accessToken;
 
+      console.log(response.data);
+
       setAuth({
         accessToken,
         user_id: response.data.user.id,
+        user_img: response.data.user.user_img,
+        user_name: response.data.user.name,
       });
 
       // navigate(from, { replace: true });

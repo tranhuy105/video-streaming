@@ -22,6 +22,8 @@ const useRefreshToken = () => {
         ...cur,
         accessToken: response.data.accessToken,
         user_id: response.data.user_id,
+        user_img: response.data.user_img,
+        user_name: response.data.user_name,
       };
     });
     return response.data.accessToken;
