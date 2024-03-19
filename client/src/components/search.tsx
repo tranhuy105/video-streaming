@@ -1,10 +1,19 @@
 import { ChangeEvent, useState } from "react";
 import { Input } from "./ui/input";
 import { Search } from "lucide-react";
-import { useSearchParams } from "react-router-dom";
+import {
+  useLocation,
+  useNavigate,
+  useSearchParams,
+} from "react-router-dom";
 
 export const SearchInput = () => {
   const [value, setValue] = useState<string>("");
+  const navigate = useNavigate();
+  const location = useLocation();
+  const [, setSearchParams] = useSearchParams();
+
+  // console.log(location.pathname);
 
   const handleChange = (
     e: ChangeEvent<HTMLInputElement>
@@ -12,11 +21,15 @@ export const SearchInput = () => {
     setValue(e.target.value);
   };
 
-  const [, setSearchParams] = useSearchParams();
-
   const handleSearch = (e: any) => {
     e.preventDefault();
     if (value.length < 1) return;
+
+    if (location.pathname !== "/") {
+      navigate(`/?search=${value}`);
+      return;
+    }
+
     setSearchParams((currentSearchParams) => {
       return new URLSearchParams({
         ...Object.fromEntries(currentSearchParams),

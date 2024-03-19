@@ -55,7 +55,7 @@ export const VideosTable = ({
           Số lượt bình luận
         </div>
       </div>
-      <div className="flex flex-col w-full h-full z-[9999]">
+      <div className="flex flex-col w-full h-full z-[9999] mb-12">
         {studioVideos.map(
           (studioVideo: StudioVideoTypes) => (
             <StudioVideoItem

@@ -4,6 +4,7 @@ import { Thumbnail } from "./thumbnail";
 import { formatDistanceToNow } from "date-fns";
 import { cn } from "@/lib/utils";
 import { Overlay } from "../overlay";
+import { vi } from "date-fns/locale";
 
 const placeholder_img =
   "https://avatars.githubusercontent.com/u/136960770?v=4";
@@ -22,6 +23,7 @@ export const VideoItem = ({
     video.updated_at,
     {
       addSuffix: true,
+      locale: vi,
     }
   );
 

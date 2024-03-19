@@ -10,10 +10,12 @@ export const LoadVideos = ({
   filterQuery,
   searchQuery,
   small,
+  video_id,
 }: {
   filterQuery?: string;
   searchQuery?: string;
   small?: boolean;
+  video_id?: string;
 }) => {
   const [page, setPage] = useState(1);
   const [videos, setVideos] = useState<VideoType[]>([]);
@@ -25,7 +27,7 @@ export const LoadVideos = ({
   useEffect(() => {
     const loadMoreVideo = async () => {
       try {
-        console.log("load more");
+        console.log("load more:");
         const nextPage = page + 1;
         const response =
           (await axiosPrivate.get("/video", {
@@ -33,7 +35,8 @@ export const LoadVideos = ({
               page: page + 1,
               filter: filterQuery,
               search: searchQuery,
-              perPage: small && 3,
+              perPage: small && 4,
+              rec: video_id,
             },
           })) ?? [];
 
@@ -87,15 +90,11 @@ export const LoadVideos = ({
         </div>
       ) : !small ? (
         <div className="text-neutral-200/50 gap-0 text-center flex items-center justify-center flex-col mt-28">
-          <p className="text-3xl font-bold text-center">
-            Hết òi!
-          </p>
-
-          <img
+          {/* <img
             src={"/minori.png"}
             alt="minori"
-            className="grayscale-0 object-cover object-center select-none pointer-events-none -mt-20"
-          />
+            className="grayscale-0 object-cover object-center select-none pointer-events-none"
+          /> */}
         </div>
       ) : (
         <></>

@@ -8,6 +8,8 @@ const insertVideoToDatabase = require("../utils/insert-video");
 const authenticateToken = require("../middleware/authorization");
 const db = require("../db");
 const deleteFile = require("../utils/delete-video");
+const getVideoWithPagination = require("../utils/get-all-video");
+const createNotification = require("../utils/createNotification");
 
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
@@ -101,7 +103,7 @@ router.get("/:filename", function (req, res) {
       videoStream.pipe(res, { end: false });
       videoStream.on("end", () => res.end());
     } else {
-      const CHUNK_SIZE = 3 * 10 ** 6;
+      const CHUNK_SIZE = 2 * 10 ** 6;
       const start = Number(range.replace(/\D/g, ""));
       const end = Math.min(
         start + CHUNK_SIZE,
@@ -131,82 +133,7 @@ router.get("/:filename", function (req, res) {
 });
 
 // get video with pagegination
-router.get("/", authenticateToken, async (req, res) => {
-  const { user_id } = req.user;
-  const { page = 1, perPage = 6 } = req.query;
-
-  let sqlQuery =
-    "SELECT video.id, src, title, updated_at, users.name,users.img FROM video JOIN users ON users.id = video.owner_id";
-  const queryParams = [];
-  if (req.query.filter === "mine") {
-    sqlQuery = `SELECT video.id, src, title, updated_at, users.name,users.img 
-      FROM video JOIN users ON users.id = video.owner_id 
-      WHERE video.owner_id = $1`;
-    queryParams.push(user_id);
-  }
-
-  if (req.query.filter === "sub") {
-    sqlQuery = `SELECT 
-                  video.id,
-                  video.src,
-                  video.title,
-                  video.updated_at,
-                  users.name,
-                  users.img
-                FROM 
-                  video
-                JOIN 
-                  subscribers ON video.owner_id = subscribers.followed_id 
-                JOIN 
-                  users ON users.id = video.owner_id
-                WHERE 
-                  subscribers.following_id = $1`;
-    queryParams.push(user_id);
-  }
-
-  if (req.query.filter === "liked") {
-    sqlQuery = `SELECT 
-                  video.id,
-                  video.src,
-                  video.title,
-                  video.updated_at,
-                  users.name,
-                  users.img
-                FROM video
-                JOIN likes ON video.id = likes.video_id
-                JOIN users ON users.id = video.owner_id
-                WHERE likes.user_id = $1`;
-    queryParams.push(user_id);
-  }
-
-  if (req.query.search) {
-    if (req.query.filter) {
-      sqlQuery +=
-        " AND ( video.title ILIKE $2 OR users.name ILIKE $3)";
-      queryParams.push(`%${req.query.search}%`);
-      queryParams.push(`%${req.query.search}%`);
-    } else {
-      sqlQuery = "SELECT video.id, src, title, updated_at, users.name,users.img FROM video JOIN users ON users.id = video.owner_id WHERE video.title ILIKE $1 OR users.name ILIKE $2";
-      queryParams.push(`%${req.query.search}%`);
-      queryParams.push(`%${req.query.search}%`);
-    }
-  }
-
-  try {
-    const offset = (page - 1) * perPage;
-    sqlQuery += ` ORDER BY updated_at DESC OFFSET $${queryParams.length + 1} LIMIT $${queryParams.length + 2};`;
-    queryParams.push(offset, perPage);
-  
-
-    const response = await db.query(sqlQuery, queryParams);
-    res.status(200).json(response.rows);
-  } catch (err) {
-    console.log(err);
-    res
-      .status(500)
-      .json({ error: "Can't get data from db" });
-  }
-});
+router.get("/", authenticateToken, getVideoWithPagination);
 
 // get a single video for watching page
 router.get(
@@ -261,12 +188,19 @@ router.post(
   authenticateToken,
   async (req, res) => {
     try {
-      const { video_id } = req.body;
+      const { video_id, owner_id } = req.body;
       const { user_id } = req.user;
 
       await db.query(
         "insert into likes (user_id, video_id) VALUES ($1,$2)",
         [user_id, video_id]
+      );
+
+      await createNotification(
+        owner_id,
+        user_id,
+        "like",
+        video_id
       );
 
       console.log("like", user_id, video_id);
@@ -277,7 +211,6 @@ router.post(
     }
   }
 );
-
 
 // dislike (delete like)
 router.post(
@@ -307,7 +240,8 @@ router.post(
   "/comment",
   authenticateToken,
   async (req, res) => {
-    const { content, parent_id, video_id } = req.body;
+    const { content, parent_id, video_id, owner_id } =
+      req.body;
     const { user_id, user_name, user_img } = req.user;
 
     console.log(user_name + " comment video: " + video_id);
@@ -327,6 +261,13 @@ router.post(
     }
 
     const results = await db.query(sqlQuery, queryParams);
+
+    await createNotification(
+      owner_id,
+      user_id,
+      "comment",
+      video_id
+    );
 
     res
       .status(200)

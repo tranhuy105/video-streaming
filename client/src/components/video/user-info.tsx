@@ -65,7 +65,7 @@ export const UserInfo = ({
           "/user/sub",
           POST_DATA
         );
-        console.log(subCount);
+        // console.log(subCount);
         setSubCount((cur) => cur + 1);
         setSubscribed(true);
         console.log(response.data);

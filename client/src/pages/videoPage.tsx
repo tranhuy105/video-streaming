@@ -6,6 +6,7 @@ import { format, formatDistanceToNow } from "date-fns";
 import { Loading } from "@/components/loading";
 import { SmallVideoCards } from "@/components/small-video-cards";
 import { Comments } from "@/components/comment/comments";
+import ScrollToTop from "@/components/scroll-to-top";
 
 type VideoType = {
   id: string;
@@ -76,6 +77,7 @@ const VideoPage = () => {
 
   return (
     <div className="w-full min-h-screen text-white flex container">
+      <ScrollToTop />
       <div className="w-3/4">
         {/* VIDEO CONTAINER */}
         <div className="w-full">

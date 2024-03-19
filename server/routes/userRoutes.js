@@ -1,6 +1,7 @@
 const db = require("../db");
 const authenticateToken = require("../middleware/authorization");
 const bcrypt = require("bcrypt");
+const createNotification = require("../utils/createNotification");
 
 const router = require("express").Router();
 
@@ -45,15 +46,17 @@ router.get("/", authenticateToken, async (req, res) => {
 });
 
 // subscribe
-router.post("/sub", authenticateToken,async (req, res) => {
+router.post("/sub", authenticateToken, async (req, res) => {
   try {
     const { owner_id } = req.body;
-    const {user_id} = req.user;
+    const { user_id } = req.user;
 
     await db.query(
       "insert into subscribers (following_id, followed_id) VALUES ($1,$2)",
       [user_id, owner_id]
     );
+
+    await createNotification(owner_id, user_id, "sub");
 
     console.log("sub", user_id, owner_id);
     res.json("sub");
@@ -63,53 +66,71 @@ router.post("/sub", authenticateToken,async (req, res) => {
   }
 });
 
-router.post("/delete/sub", authenticateToken,async (req, res) => {
-  try {
-    const { owner_id } = req.body;
-    const {user_id} = req.user;
+router.post(
+  "/delete/sub",
+  authenticateToken,
+  async (req, res) => {
+    try {
+      const { owner_id } = req.body;
+      const { user_id } = req.user;
 
-    await db.query(
-      "DELETE FROM subscribers WHERE following_id = $1 AND followed_id = $2;",
-      [user_id, owner_id]
-    );
+      await db.query(
+        "DELETE FROM subscribers WHERE following_id = $1 AND followed_id = $2;",
+        [user_id, owner_id]
+      );
 
-    console.log("unsub", user_id, owner_id);
-    res.json("ubsub");
-  } catch (error) {
-    console.log(error);
-    res.status(500).json("Can't connect to database");
-  }
-});
-
-router.post('/subcount', authenticateToken, async (req,res) => {
-  try {
-    const {owner_id} = req.body;
-    if (!owner_id) {
-      res.status(404).json({error: 'NULL owner id'});
+      console.log("unsub", user_id, owner_id);
+      res.json("ubsub");
+    } catch (error) {
+      console.log(error);
+      res.status(500).json("Can't connect to database");
     }
+  }
+);
 
-    const results = 
-      await db.query(`SELECT 
+router.post(
+  "/subcount",
+  authenticateToken,
+  async (req, res) => {
+    try {
+      const { owner_id } = req.body;
+      if (!owner_id) {
+        res.status(404).json({ error: "NULL owner id" });
+      }
+
+      const results = await db.query(
+        `SELECT 
                         COUNT(distinct following_id) AS number_of_sub 
                       FROM subscribers 
-                      WHERE followed_id = $1;`, [owner_id])
+                      WHERE followed_id = $1;`,
+        [owner_id]
+      );
 
-    res.status(200).json(results.rows[0]);
-  } catch (err) {
-    console.log(err);
-    res.status(500).json({error: "Internal Server Error, DB FAIL"})
-  }
-})
-
-router.post('/channel/:channel_owner_id', authenticateToken, async (req, res) => {
-  try {
-    const {channel_owner_id} = req.params;
-
-    if (!channel_owner_id) {
-      res.status(401).json({error: "NULL CHANNEL OWNER ID"})
+      res.status(200).json(results.rows[0]);
+    } catch (err) {
+      console.log(err);
+      res
+        .status(500)
+        .json({ error: "Internal Server Error, DB FAIL" });
     }
+  }
+);
 
-    const channelQuery = await db.query(`
+router.post(
+  "/channel/:channel_owner_id",
+  authenticateToken,
+  async (req, res) => {
+    try {
+      const { channel_owner_id } = req.params;
+
+      if (!channel_owner_id) {
+        res
+          .status(401)
+          .json({ error: "NULL CHANNEL OWNER ID" });
+      }
+
+      const channelQuery = await db.query(
+        `
       SELECT 
         users.name, 
         users.email, 
@@ -117,9 +138,12 @@ router.post('/channel/:channel_owner_id', authenticateToken, async (req, res) =>
         users.id
       FROM users 
       WHERE users.id = $1
-    `, [channel_owner_id]);
+    `,
+        [channel_owner_id]
+      );
 
-    const videosQuery = await db.query(`
+      const videosQuery = await db.query(
+        `
       SELECT 
         video.id, 
         video.updated_at,
@@ -130,18 +154,22 @@ router.post('/channel/:channel_owner_id', authenticateToken, async (req, res) =>
       FROM video 
       WHERE owner_id = $1
       ORDER BY updated_at DESC;
-    `,[channel_owner_id]);
+    `,
+        [channel_owner_id]
+      );
 
-    res.json({
-      channelInfo: channelQuery.rows[0],
-      videos: videosQuery.rows
-    })
-
-  } catch (error) {
-    console.log(error);
-    res.status(500).json({error: "Internal Server Error, DB FAIL"})
+      res.json({
+        channelInfo: channelQuery.rows[0],
+        videos: videosQuery.rows,
+      });
+    } catch (error) {
+      console.log(error);
+      res
+        .status(500)
+        .json({ error: "Internal Server Error, DB FAIL" });
+    }
   }
-})
+);
 
 router.post(
   "/name",
@@ -210,7 +238,7 @@ router.get(
       const results = await db.query(
         `
         SELECT 
-          COUNT(likes.*) AS like_count,
+          COUNT(distinct likes.*) AS like_count,
           COUNT(comments.*) as cmt_count, 
           video.title, 
           video.id, 
@@ -249,5 +277,38 @@ router.get(
     }
   }
 );
+
+router.get("/noti", authenticateToken, async (req, res) => {
+  const { user_id } = req.user;
+
+  try {
+    const results = await db.query(
+      `
+      SELECT 
+      notifications.*,
+      users.img as sender_img,
+      users.name as sender_name
+      FROM 
+        notifications 
+      JOIN 
+        users 
+      ON 
+        sender_id = users.id 
+      WHERE 
+        user_id = $1 
+      ORDER BY 
+        notifications.created_at DESC LIMIT 5
+    `,
+      [user_id]
+    );
+
+    // console.log(results.rows);
+
+    res.status(200).json(results.rows);
+  } catch (error) {
+    console.log(error);
+    res.status(500).json("FAIL TO GET NOTIFICATION");
+  }
+});
 
 module.exports = router;

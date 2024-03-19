@@ -6,6 +6,10 @@
 html,
 body {
   height: 100%;
+  @apply bg-neutral-900;
+}
+
+#root main {
   @apply bg-neutral-900
 }
 
@@ -75,7 +79,7 @@ body {
 
 @layer base {
   * {
-    @apply border-border;
+    @apply border-border ;
   }
   body {
     @apply bg-background text-foreground;

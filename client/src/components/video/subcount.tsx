@@ -24,7 +24,7 @@ export const Subcount = ({
           }
         );
 
-        setSubCount(response.data.number_of_sub);
+        setSubCount(response.data.number_of_sub * 1);
       } catch (error) {
         console.log(error);
       }

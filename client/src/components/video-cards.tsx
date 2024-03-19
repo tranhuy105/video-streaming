@@ -1,5 +1,5 @@
 import useAxiosPrivate from "@/hooks/useAxiosPrivate";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import { VideoSkeleton } from "./video/video-skeletion";
@@ -21,6 +21,7 @@ export const VideoCards = () => {
   const [isLoading, setIsLoading] = useState(false);
   const axiosPrivate = useAxiosPrivate();
   const [searchParams] = useSearchParams();
+  const isFirstRender = useRef(true);
 
   const query = Object.fromEntries(searchParams);
   const filterQuery = query.filter;
@@ -30,6 +31,7 @@ export const VideoCards = () => {
   useEffect(() => {
     const fetchVideo = async () => {
       try {
+        console.log("fetch first time");
         setIsLoading(true);
         const response = await axiosPrivate.get("/video", {
           params: {
@@ -47,24 +49,43 @@ export const VideoCards = () => {
       }
     };
 
-    fetchVideo();
+    if (!isFirstRender.current) {
+      fetchVideo();
+    } else {
+      isFirstRender.current = false;
+    }
   }, [filterQuery, searchQuery, axiosPrivate]);
 
   return (
     <>
       {!isLoading ? (
         <>
-          <div
-            className={cn(
-              "text-white grid grid-cols-3 w-full gap-x-3 gap-y-6 p-4 pr-8"
-            )}
-          >
-            <Videos videos={videos} />
-          </div>
-          <LoadVideos
-            filterQuery={filterQuery}
-            searchQuery={searchQuery}
-          />
+          {!videos.length ? (
+            <div className="min-h-[calc(100vh-64px)] text-neutral-200 flex items-center justify-center font-bold text-3xl">
+              <img
+                src="/minori.png"
+                alt="minori"
+                className="-ml-48"
+              />
+              <p>
+                OOPS! <br /> NO VIDEO FOUND
+              </p>
+            </div>
+          ) : (
+            <>
+              <div
+                className={cn(
+                  "text-white grid grid-cols-3 w-full gap-x-3 gap-y-6 p-4 pr-8"
+                )}
+              >
+                <Videos videos={videos} />
+              </div>
+              <LoadVideos
+                filterQuery={filterQuery}
+                searchQuery={searchQuery}
+              />
+            </>
+          )}
         </>
       ) : (
         <div

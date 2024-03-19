@@ -71,6 +71,7 @@ export const Comments = ({
         const POSTDATA = {
           content: val,
           video_id: video_id,
+          owner_id: video_owner_id,
         };
         setFetchLoading(true);
         const response = await axiosPrivate.post(

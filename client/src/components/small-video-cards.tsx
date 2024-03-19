@@ -1,9 +1,10 @@
 import useAxiosPrivate from "@/hooks/useAxiosPrivate";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { cn } from "@/lib/utils";
 import { VideoSkeleton } from "./video/video-skeletion";
 import { Videos } from "./video/videos";
 import { LoadVideos } from "./video/load-videos";
+import { useParams } from "react-router-dom";
 
 export type VideoType = {
   id: string;
@@ -18,6 +19,9 @@ export const SmallVideoCards = () => {
   const [videos, setVideos] = useState<VideoType[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const axiosPrivate = useAxiosPrivate();
+  const isFirstRender = useRef(true);
+
+  const { video_id } = useParams();
 
   useEffect(() => {
     const fetchVideo = async () => {
@@ -25,7 +29,8 @@ export const SmallVideoCards = () => {
         setIsLoading(true);
         const response = await axiosPrivate.get("/video", {
           params: {
-            perPage: 3,
+            perPage: 4,
+            rec: video_id,
           },
         });
         setVideos(response.data);
@@ -35,9 +40,12 @@ export const SmallVideoCards = () => {
         setIsLoading(false);
       }
     };
-
-    fetchVideo();
-  }, [axiosPrivate]);
+    if (!isFirstRender.current) {
+      fetchVideo();
+    } else {
+      isFirstRender.current = false;
+    }
+  }, [axiosPrivate, video_id]);
 
   return (
     <>
@@ -50,7 +58,7 @@ export const SmallVideoCards = () => {
           >
             <Videos videos={videos} />
           </div>
-          <LoadVideos small />
+          <LoadVideos small video_id={video_id} />
         </>
       ) : (
         <div
@@ -59,6 +67,7 @@ export const SmallVideoCards = () => {
           )}
         >
           <>
+            <VideoSkeleton small={false} />
             <VideoSkeleton small={false} />
             <VideoSkeleton small={false} />
             <VideoSkeleton small={false} />

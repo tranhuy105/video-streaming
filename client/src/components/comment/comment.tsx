@@ -84,6 +84,7 @@ export const Comment = ({
           content: replyVal,
           parent_id: comment.id,
           video_id: video_id,
+          owner_id: video_owner_id,
         };
         setIsLoading(true);
         const response = await axiosPrivate.post(
@@ -253,7 +254,7 @@ export const Comment = ({
       {!isChild && (
         <div
           className={cn(
-            "space-y-5 pb-1 ",
+            "space-y-4 pb-1 ",
             showChild
               ? "pb-2 pt-2"
               : " opacity-0 absolute pointer-events-none"

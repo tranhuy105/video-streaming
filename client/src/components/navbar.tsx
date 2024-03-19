@@ -3,7 +3,7 @@ import { SignOutButton } from "./auth/sign-out-button";
 import { Youtube } from "lucide-react";
 import { SearchInput } from "./search";
 import { UploadButton } from "./upload-video/upload-button";
-import { Notification } from "./notification";
+import { Notifications } from "./notification/notifications";
 
 export const Navbar = () => {
   const navigate = useNavigate();
@@ -25,7 +25,7 @@ export const Navbar = () => {
       <div className="flex text-white items-center gap-4">
         <div className="flex items-center justify-center gap-1">
           <UploadButton />
-          <Notification />
+          <Notifications />
         </div>
         <SignOutButton />
       </div>

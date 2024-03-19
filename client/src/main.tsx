@@ -9,11 +9,8 @@ ReactDOM.createRoot(
   document.getElementById("root")!
 ).render(
   <React.StrictMode>
-    <div>
-      <AuthProvider>
-        <App />
-      </AuthProvider>
-    </div>
-    //{" "}
+    <AuthProvider>
+      <App />
+    </AuthProvider>
   </React.StrictMode>
 );

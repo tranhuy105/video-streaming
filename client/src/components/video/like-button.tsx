@@ -1,7 +1,7 @@
 import useAxiosPrivate from "@/hooks/useAxiosPrivate";
 import { cn } from "@/lib/utils";
 import { ThumbsUp } from "lucide-react";
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 
 interface LikeButtonProps {
   handleLike: any;
@@ -21,6 +21,7 @@ export const LikeButton = ({
   setLikedCount,
 }: LikeButtonProps) => {
   const axiosPrivate = useAxiosPrivate();
+  const isFirstRender = useRef(true);
 
   useEffect(() => {
     const fetchLikeCount = async () => {
@@ -35,8 +36,11 @@ export const LikeButton = ({
         console.log(error);
       }
     };
-
-    fetchLikeCount();
+    if (!isFirstRender.current) {
+      fetchLikeCount();
+    } else {
+      isFirstRender.current = false;
+    }
   }, [video_id]);
 
   return (
